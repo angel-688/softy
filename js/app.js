@@ -496,12 +496,12 @@
             entries.forEach((entry => {
                 if (entry.isIntersecting && entry.intersectionRatio > .4) {
                     entry.target.classList.add("_anim");
-                    if (entry.target.hasAttribute("data-stay-anim")) observer.unobserve(entry.target);
+                    observer.unobserve(entry.target);
                     if (entry.target.querySelectorAll("[data-counter]").length) counterInit(entry.target.querySelectorAll("[data-counter]"));
-                } else if (0 === entry.intersectionRatio) entry.target.classList.remove("_anim");
+                }
             }));
         }), {
-            threshold: [ .4, 0 ]
+            threshold: .4
         });
         document.querySelectorAll("[data-anim]").forEach((animItem => animObserver.observe(animItem)));
         const sections = document.querySelectorAll("[data-section]");
