@@ -14,6 +14,29 @@
             document.documentElement.classList.add(className);
         }));
     }
+    let isMobile = {
+        Android: function() {
+            return navigator.userAgent.match(/Android/i);
+        },
+        BlackBerry: function() {
+            return navigator.userAgent.match(/BlackBerry/i);
+        },
+        iOS: function() {
+            return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+        },
+        Opera: function() {
+            return navigator.userAgent.match(/Opera Mini/i);
+        },
+        Windows: function() {
+            return navigator.userAgent.match(/IEMobile/i);
+        },
+        any: function() {
+            return isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows();
+        }
+    };
+    function addTouchClass() {
+        if (isMobile.any()) document.documentElement.classList.add("touch");
+    }
     let bodyLockStatus = true;
     let bodyLockToggle = (delay = 500) => {
         if (document.documentElement.classList.contains("lock")) bodyUnlock(delay); else bodyLock(delay);
@@ -509,27 +532,34 @@
         links.forEach((link => {
             link.addEventListener("click", (function(e) {
                 const item = document.querySelector(`.${link.dataset.link}`);
+                console.log(item.offsetHeight);
                 const go = item.getBoundingClientRect().top + scrollY - document.querySelector(".header__wrapper").clientHeight;
+                if (document.documentElement.classList.contains("menu-open")) {
+                    bodyUnlock();
+                    document.documentElement.classList.remove("menu-open");
+                }
                 window.scrollTo({
                     top: go,
                     behavior: "smooth"
                 });
             }));
         }));
-        const activeObserver = new IntersectionObserver((entries => {
-            entries.forEach((entry => {
-                if (entry.isIntersecting && entry.intersectionRatio > .6) if (links.length) links.forEach((link => {
-                    link.classList.remove("_active");
-                    const actives = document.querySelector(`[data-link='${entry.target.dataset.section}']`);
-                    if (actives) actives.classList.add("_active");
+        if (document.documentElement.classList.contains("touch")) {
+            const activeObserver = new IntersectionObserver((entries => {
+                entries.forEach((entry => {
+                    if (entry.isIntersecting && entry.intersectionRatio > .6) if (links.length) links.forEach((link => {
+                        link.classList.remove("_active");
+                        const actives = document.querySelector(`[data-link='${entry.target.dataset.section}']`);
+                        if (actives) actives.classList.add("_active");
+                    }));
                 }));
+            }), {
+                threshold: .6
+            });
+            sections.forEach((section => {
+                activeObserver.observe(section);
             }));
-        }), {
-            threshold: .6
-        });
-        sections.forEach((section => {
-            activeObserver.observe(section);
-        }));
+        }
         if (playButton) playButton.addEventListener("click", (function(e) {
             const videoSrc = document.querySelector(".video-block__video").src;
             const newSrc = videoSrc + "?rel=0&showinfo=0&autoplay=1";
@@ -539,6 +569,7 @@
     }));
     window["FLS"] = true;
     isWebp();
+    addTouchClass();
     menuInit();
     formFieldsInit({
         viewPass: false,
